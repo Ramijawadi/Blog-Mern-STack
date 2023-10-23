@@ -9,7 +9,14 @@ const User = require('./Models/User')
 const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
 
-app.use(cors());
+//parse cookies
+
+var cookieParser = require('cookie-parser')
+app.use(cookieParser())
+
+app.use(cors({credentials:true , origin:"http://localhost:3000"
+
+}));
 app.use(express.json());
 const jwt = require('jsonwebtoken');
 const secret = 'hgsdsqd45kskdksjd8sdd';
@@ -48,7 +55,14 @@ if(passOk){
   jwt.sign({username ,id:userDoc._id} , secret , {} , (err , token)=> {
 if(err)
 throw err ; 
-res.json(token)
+
+//stored token as cookie
+res.cookie('token',token).json({
+
+id:userDoc._id, 
+username,
+
+})
   }) ;
     //create a token
 }
@@ -56,6 +70,22 @@ else {
     
 res.status(400).json('wrong credentials')
 }
+
+});
+
+app.get('/profile' , (req, res)=> {
+
+    const {token} = req.cookies;
+    jwt.verify(token , secret , {} ,(err , info) => {
+
+        if(err) throw err ; 
+        res.json(info);
+    })
+})
+
+app.post('/logout' , (req , res) => {
+
+res.cookie('token' , '').json('ok');
 
 })
 
