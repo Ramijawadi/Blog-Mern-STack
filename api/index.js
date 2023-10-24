@@ -3,7 +3,7 @@ const app = express();
 const cors = require('cors');
 const mongoose = require('mongoose')
 const User = require('./Models/User')
-
+const Post = require('./Models/Post')
 //crypte password
 
 const bcrypt = require('bcryptjs');
@@ -96,7 +96,7 @@ res.cookie('token' , '').json('ok');
 });
 
 
-app.post('/post' , uploadMiddleWare.single('file'), (req, res) => {
+app.post('/post' , uploadMiddleWare.single('file'), async (req, res) => {
 
 const {originalname , path} = req.file ; 
 
@@ -106,10 +106,16 @@ const newPath =path+'.'+extension;
 
 fs.renameSync(path, newPath);
 
+const { title , summary , content} = req.body ; 
+const postDoc = await Post.create({
+title , 
+summary , 
+content ,
+cover: newPath , 
+});
 
+res.json(postDoc);
 
-
-res.json({extension});
 });
 
 app.listen(4000)
