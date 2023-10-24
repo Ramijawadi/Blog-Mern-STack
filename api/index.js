@@ -21,6 +21,12 @@ app.use(express.json());
 const jwt = require('jsonwebtoken');
 const secret = 'hgsdsqd45kskdksjd8sdd';
 
+//multer for images
+const multer  = require('multer')
+const uploadMiddleWare = multer({ dest: 'uploads/' })
+
+
+
 mongoose.connect('mongodb+srv://rami:rami@cluster0.j2me5ib.mongodb.net')
 
 
@@ -87,7 +93,18 @@ app.post('/logout' , (req , res) => {
 
 res.cookie('token' , '').json('ok');
 
-})
+});
+
+
+app.post('/post' , uploadMiddleWare.single('file'), (req, res) => {
+
+const {originalname} = req.file ; 
+
+const parts = originalname.split('.');
+const extension = parts[parts.length -1];
+res.json({extension});
+
+});
 
 app.listen(4000)
 
