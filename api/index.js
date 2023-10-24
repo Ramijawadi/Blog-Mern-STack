@@ -24,7 +24,7 @@ const secret = 'hgsdsqd45kskdksjd8sdd';
 //multer for images
 const multer  = require('multer')
 const uploadMiddleWare = multer({ dest: 'uploads/' })
-
+const fs = require('fs');
 
 
 mongoose.connect('mongodb+srv://rami:rami@cluster0.j2me5ib.mongodb.net')
@@ -98,12 +98,18 @@ res.cookie('token' , '').json('ok');
 
 app.post('/post' , uploadMiddleWare.single('file'), (req, res) => {
 
-const {originalname} = req.file ; 
+const {originalname , path} = req.file ; 
 
 const parts = originalname.split('.');
 const extension = parts[parts.length -1];
-res.json({extension});
+const newPath =path+'.'+extension;
 
+fs.renameSync(path, newPath);
+
+
+
+
+res.json({extension});
 });
 
 app.listen(4000)
