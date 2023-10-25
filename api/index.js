@@ -12,7 +12,9 @@ const salt = bcrypt.genSaltSync(10);
 //parse cookies
 
 var cookieParser = require('cookie-parser')
-app.use(cookieParser())
+app.use(cookieParser());
+app.use('/uploads' , express.static(__dirname + '/uploads'));
+
 
 app.use(cors({credentials:true , origin:"http://localhost:3000"
 
@@ -28,6 +30,9 @@ const fs = require('fs');
 
 
 mongoose.connect('mongodb+srv://rami:rami@cluster0.j2me5ib.mongodb.net')
+
+
+
 
 
 app.post('/register', async (req, res) => {
@@ -106,23 +111,33 @@ const newPath =path+'.'+extension;
 
 fs.renameSync(path, newPath);
 
-const { title , summary , content} = req.body ; 
-const postDoc = await Post.create({
-title , 
-summary , 
-content ,
-cover: newPath , 
+
+const {token} = req.cookies;
+jwt.verify(token , secret , {} ,async (err , info) => {
+
+    if(err) throw err ; 
+
+    const { title , summary , content} = req.body ; 
+    const postDoc = await Post.create({
+    title , 
+    summary , 
+    content ,
+    cover: newPath , 
+    author:info.id
+    });
+
+    res.json(postDoc);
+  
 });
-
-res.json(postDoc);
-
 });
 
 
 app.get('/post' ,async (req, res) => {
 
 
-const posts = await Post.find( );
+const posts = await Post.find().populate('author' , ['username'])
+.sort({createdAt: -1})
+.limit(20);
 
 res.json(posts);
 
