@@ -28,12 +28,7 @@ const multer  = require('multer')
 const uploadMiddleWare = multer({ dest: 'uploads/' })
 const fs = require('fs');
 
-
 mongoose.connect('mongodb+srv://rami:rami@cluster0.j2me5ib.mongodb.net')
-
-
-
-
 
 app.post('/register', async (req, res) => {
 const {username , password} = req.body;
@@ -100,6 +95,7 @@ res.cookie('token' , '').json('ok');
 
 });
 
+/*get oparation with file*/ 
 
 app.post('/post' , uploadMiddleWare.single('file'), async (req, res) => {
 
@@ -131,6 +127,8 @@ jwt.verify(token , secret , {} ,async (err , info) => {
 });
 });
 
+
+/*update operation*/ 
 
 
 app.put('/post' , uploadMiddleWare.single('file'), async(req , res) => {
@@ -170,10 +168,27 @@ await postDoc.updateOne({title,
      cover:newPath?newPath : postDoc.cover,})
 
 res.json(postDoc)
- 
 });
-
 })
+
+/*delete operation*/ 
+
+
+app.delete('/post/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const result = await Post.findByIdAndDelete(id);
+      if (!result) {
+        return res.status(404).send({ message: "blog not found" });
+      }
+      return res.status(200).send({ message: " Blog  deleted successfully" });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({ message: error.message });
+    }
+  });
+  
+
 
 app.get('/post' ,async (req, res) => {
 const posts = await Post.find().populate('author' , ['username'])
